@@ -1,0 +1,26 @@
+# Конфиг nginx как reverse proxy перед приложением в Docker (порт 8501 на localhost).
+# Скопировать на сервер в /etc/nginx/sites-available/crypto-codes,
+# заменить YOUR_HOST на "IP.sslip.io" (см. DEPLOY.md) и включить симлинком в sites-enabled.
+# certbot допишет сюда блок с сертификатами сам после `certbot --nginx`.
+
+server {
+    listen 80;
+    server_name YOUR_HOST;
+
+    location / {
+        proxy_pass http://127.0.0.1:8501;
+        proxy_http_version 1.1;
+
+        # Обязательно для Streamlit: он держит соединение через WebSocket.
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Загрузка нескольких больших xlsx-файлов разом — поднимаем лимит с дефолтного 1m.
+        client_max_body_size 200m;
+    }
+}

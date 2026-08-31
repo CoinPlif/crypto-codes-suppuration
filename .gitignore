@@ -1,0 +1,8 @@
+__pycache__/
+.pytest_cache/
+.streamlit/secrets.toml
+streamlit.log
+
+# Выгрузки кодов и результаты склейки в репозиторий не кладём
+*.xlsx
+*.xls
